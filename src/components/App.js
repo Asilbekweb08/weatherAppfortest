@@ -50,8 +50,8 @@ function App() {
     event.preventDefault();
     if (event.type === "click" || (event.type === "keypress" && event.key === "Enter")) {
       setWeather({ ...weather, loading: true });
-      const apiKey = process.env.REACT_APP_WEATHER_API_KEY;
-      const url = `https://api.shecodes.io/weather/v1/current?query=${query}&key=${apiKey}`;
+      const apiKey = "731e98d2c802076c5d896f33272861b8"
+      const url = `https://api.openweathermap.org/data/2.5/weather?q=${query}&appid=${apiKey}`;
 
       try {
         const res = await axios.get(url);
@@ -65,8 +65,10 @@ function App() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const apiKey = process.env.REACT_APP_WEATHER_API_KEY;
-      const url = `https://api.shecodes.io/weather/v1/current?query=Rabat&key=${apiKey}`;
+      // console.log(process.env.REACT_APP_WEATHER_API_KEY);
+      
+      const apiKey = "731e98d2c802076c5d896f33272861b8"
+      const url = `https://api.openweathermap.org/data/2.5/weather?q=Tashkent&appid=${apiKey}`;
 
       try {
         const response = await axios.get(url);
@@ -79,7 +81,8 @@ function App() {
 
     fetchData();
   }, []);
-
+  console.log(weather);
+  
   return (
     <div className="App">
       {/* SearchEngine component */}
@@ -105,7 +108,7 @@ function App() {
         </>
       )}
 
-      {weather && weather.data && weather.data.condition && (
+      {weather && weather.data && weather.data.weather && (
         // Forecast component
         <Forecast weather={weather} toDate={toDate} />
       )}

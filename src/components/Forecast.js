@@ -1,123 +1,68 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import ReactAnimatedWeather from "react-animated-weather";
+import React from "react";
 
-function Forecast({ weather }) {
+const Forecast = ({ weather, toDate }) => {
   const { data } = weather;
-  const [forecastData, setForecastData] = useState([]);
-  const [isCelsius, setIsCelsius] = useState(true); // Track temperature unit
-
-  useEffect(() => {
-    const fetchForecastData = async () => {
-      const apiKey = process.env.REACT_APP_WEATHER_API_KEY;
-      const url = `https://api.shecodes.io/weather/v1/forecast?query=${data.city}&key=${apiKey}&units=metric`;
-
-      try {
-        const response = await axios.get(url);
-        setForecastData(response.data.daily);
-      } catch (error) {
-        console.error("Error fetching forecast data:", error);
-      }
-    };
-
-    fetchForecastData();
-  }, [data.city]);
-
-  const formatDay = (dateString) => {
-    const options = { weekday: "short" };
-    const date = new Date(dateString * 1000);
-    return date.toLocaleDateString("en-US", options);
-  };
-
-  const getCurrentDate = () => {
-    const options = {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    };
-    const currentDate = new Date().toLocaleDateString("en-US", options);
-    return currentDate;
-  };
-
-  const toggleTemperatureUnit = () => {
-    setIsCelsius((prevState) => !prevState);
-  };
-
-  const convertToFahrenheit = (temperature) => {
-    return Math.round((temperature * 9) / 5 + 32);
-  };
-
-  const renderTemperature = (temperature) => {
-    return isCelsius
-      ? Math.round(temperature)
-      : convertToFahrenheit(temperature);
-  };
+  const { name, sys, main, weather: weatherDetails, wind, clouds } = data;
 
   return (
-    <div>
-      <div className="city-name">
-        <h2>
-          {data.city}, <span>{data.country}</span>
-        </h2>
-      </div>
-      <div className="date">
-        <span>{getCurrentDate()}</span>
-      </div>
-      <div className="temp">
-        {data.condition.icon_url && (
-          <img
-            src={data.condition.icon_url}
-            alt={data.condition.description}
-            className="temp-icon"
-          />
-        )}
-        {renderTemperature(data.temperature.current)}
-        <sup className="temp-deg" onClick={toggleTemperatureUnit}>
-          {isCelsius ? "°C" : "°F"} | {isCelsius ? "°F" : "°C"}
-        </sup>
-      </div>
-      <p className="weather-des">{data.condition.description}</p>
-      <div className="weather-info">
-        <div className="col">
-          <ReactAnimatedWeather icon="WIND" size="40" />
-          <div>
-            <p className="wind">{data.wind.speed} m/s</p>
-            <p>Wind speed</p>
-          </div>
-        </div>
-        <div className="col">
-          <ReactAnimatedWeather icon="RAIN" size="40" />
-          <div>
-            <p className="humidity">{data.temperature.humidity}%</p>
-            <p>Humidity</p>
-          </div>
+    <div className="bg-blue-100 p-6 rounded-lg shadow-lg max-w-md mx-auto text-gray-800 font-sans">
+      <h2 className="text-2xl font-semibold mb-2">
+        {name}, <span className="text-blue-600">{sys.country}</span>
+      </h2>
+      <p className="text-sm text-gray-600 mb-4">{toDate()}</p>
+
+      <div className="flex items-center gap-4 mb-4">
+        <img
+          src={`https://openweathermap.org/img/wn/${weatherDetails[0].icon}@2x.png`}
+          alt={weatherDetails[0].description}
+          className="w-16 h-16"
+        />
+        <div>
+          <p className="text-xl font-medium">
+            {weatherDetails[0].main}
+          </p>
+          <p className="text-gray-500 capitalize">
+            {weatherDetails[0].description}
+          </p>
         </div>
       </div>
-      <div className="forecast">
-        <h3>5-Day Forecast:</h3>
-        <div className="forecast-container">
-          {forecastData &&
-            forecastData.slice(0, 5).map((day) => (
-              <div className="day" key={day.time}>
-                <p className="day-name">{formatDay(day.time)}</p>
-                {day.condition.icon_url && (
-                  <img
-                    className="day-icon"
-                    src={day.condition.icon_url}
-                    alt={day.condition.description}
-                  />
-                )}
-                <p className="day-temperature">
-                  {Math.round(day.temperature.minimum)}° /{" "}
-                  <span>{Math.round(day.temperature.maximum)}°</span>
-                </p>
-              </div>
-            ))}
+
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div>
+          <p className="font-semibold text-gray-700">Temperature:</p>
+          <p>{(main.temp - 273.15).toFixed(2)}°C</p>
+        </div>
+        <div>
+          <p className="font-semibold text-gray-700">Feels Like:</p>
+          <p>{(main.feels_like - 273.15).toFixed(2)}°C</p>
+        </div>
+        <div>
+          <p className="font-semibold text-gray-700">Min Temp:</p>
+          <p>{(main.temp_min - 273.15).toFixed(2)}°C</p>
+        </div>
+        <div>
+          <p className="font-semibold text-gray-700">Max Temp:</p>
+          <p>{(main.temp_max - 273.15).toFixed(2)}°C</p>
+        </div>
+        <div>
+          <p className="font-semibold text-gray-700">Humidity:</p>
+          <p>{main.humidity}%</p>
+        </div>
+        <div>
+          <p className="font-semibold text-gray-700">Pressure:</p>
+          <p>{main.pressure} hPa</p>
+        </div>
+        <div>
+          <p className="font-semibold text-gray-700">Wind Speed:</p>
+          <p>{wind.speed} m/s</p>
+        </div>
+        <div>
+          <p className="font-semibold text-gray-700">Cloud Coverage:</p>
+          <p>{clouds.all}%</p>
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default Forecast;
